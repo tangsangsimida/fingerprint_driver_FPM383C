@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+void lcd_control(uint8_t ,uint8_t ,uint8_t , uint8_t );
 extern uint8_t message_lcd_return;
 extern enum {
 	breath = 0x01,//0x01 呼吸灯，
@@ -66,6 +67,7 @@ extern enum {
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -89,7 +91,16 @@ extern I2C_HandleTypeDef hi2c1;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart3;
 /* USER CODE BEGIN EV */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(GPIO_Pin);
+  lcd_control(flashing_light,lcd_color_green,lcd_color_green,10);//检测到手指放在指纹模块上就亮绿灯
+	HAL_NVIC_DisableIRQ(EXTI1_IRQn);//把中断关了以便检测到下一次的上升沿
+  /* NOTE: This function Should not be modified, when the callback is needed,
+           the HAL_GPIO_EXTI_Callback could be implemented in the user file
+   */
+}
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -244,8 +255,7 @@ void EXTI1_IRQHandler(void)
   /* USER CODE END EXTI1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(touch_check_Pin);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
-	lcd_control(flashing_light,lcd_color_all_in,lcd_color_all_in,5);
-	HAL_UART_Transmit(&huart1,"already_receve",strlen("already_receve"),200);
+
   /* USER CODE END EXTI1_IRQn 1 */
 }
 
@@ -297,7 +307,6 @@ void I2C1_ER_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */

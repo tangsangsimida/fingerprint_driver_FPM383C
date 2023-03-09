@@ -31,6 +31,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+#ifndef pack_head
 #define pack_head 						0xEF,0x01						//包头
 #define fingerprint_address				0xff,0xff,0xff,0xff				//芯片地址
 //over there is tatle auto
@@ -51,6 +52,11 @@
 #define pack_sign_lcd					0x01							//包标志
 #define num_of_cycle_infinite_lcd		0x00							//lcd循环次数
 #define instruction_code_lcd			0x3C							//lcd指令码
+#endif
+//检查指纹模块是否能够正常使用
+void finger_print_check(void);
+//lcd简易控制
+void lcd_control(uint8_t ,uint8_t ,uint8_t , uint8_t );
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -88,16 +94,16 @@ void lcd_control(uint8_t function_code_lcd,uint8_t color_begin,uint8_t color_end
 	check_sum>>=8;
 	check_sum_h = check_sum&0xff; //获取gao八位
 	uint8_t cmd[]={pack_head,fingerprint_address,pack_sign_lcd,pack_long_lcd_h,pack_long_lcd_l,instruction_code_lcd,function_code_lcd,color_begin,color_end,time,check_sum_h,check_sum_l};
-	HAL_UART_Transmit_IT(&huart3,cmd,16);//lcd的基本控制命令只有16个字节
-	HAL_UART_Receive_IT(&huart3,message_lcd_return,11);
-	HAL_UART_Transmit_IT(&huart1,cmd,16);	
-	HAL_Delay(10);
-	HAL_UART_Transmit(&huart1,message_lcd_return,11,200);
+	HAL_UART_Transmit(&huart3,cmd,16,200);//lcd的基本控制命令只有16个字节
+//	HAL_UART_Receive(&huart3,message_lcd_return,11,200);
+//	HAL_UART_Transmit(&huart1,cmd,16,200);	
+//	HAL_Delay(10);
+//	HAL_UART_Transmit(&huart1,message_lcd_return,11,200);
 }
 
 //检查指纹模块是否可以使用！！！
 //向串口一返回值！！自行查看返回值与手册对照判断指纹是否有效
-void finger_print_isok()
+void finger_print_check()
 {
 	//校验和= 包标志+……加指令码
   uint32_t check_sum = pack_sign_lcd+0x03+0x36;
@@ -109,6 +115,17 @@ void finger_print_isok()
   HAL_UART_Transmit_IT(&huart3,cmd,12);
   HAL_UART_Receive_IT(&huart3,message_lcd_return,12);
   HAL_UART_Transmit_IT(&huart1,message_lcd_return,12);
+}
+//设置指纹模块进入休眠模式并且开启PB1的上升沿中断
+void set_sleep_finger_print()
+{
+  uint8_t cmd[] = {pack_head,0xFF,0xFF,0xFF,0xFF,0x01,0x00,0x03,0x33,0x00,0x37};
+  HAL_UART_Transmit(&huart3,cmd,12,100);
+  HAL_Delay(20);
+  HAL_UART_Transmit(&huart1,cmd,12,100);
+  HAL_UART_Receive(&huart3,cmd,12,100);
+  HAL_UART_Transmit(&huart1,cmd,12,100);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);//开启PB1的上升沿中断
 }
 /* USER CODE END PM */
 
@@ -152,7 +169,10 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-	
+  //初始化先关闭外部中断PB1引脚，，，，
+  HAL_NVIC_DisableIRQ(EXTI1_IRQn);
+
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -165,8 +185,9 @@ int main(void)
   MX_SPI2_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-  lcd_control(breath,lcd_color_blue,lcd_color_blue,5);
-
+  lcd_control(flashing_light,lcd_color_blue,lcd_color_blue,10);
+   //把PB1中断屏蔽，并且把指纹模块休眠
+  set_sleep_finger_print();
   /* USER CODE END 2 */
 
   /* Infinite loop */

@@ -1,6 +1,6 @@
 #MicroXplorer Configuration settings - do not modify
-CAD.formats=
-CAD.pinconfig=
+CAD.formats=[]
+CAD.pinconfig=Pin name
 CAD.provider=
 File.Version=6
 GPIO.groupedBy=Group By Peripherals
@@ -51,7 +51,7 @@ MxCube.Version=6.7.0
 MxDb.Version=DB.6.0.70
 NVIC.BusFault_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.DebugMonitor_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
-NVIC.EXTI1_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
+NVIC.EXTI1_IRQn=true\:9\:0\:true\:false\:true\:true\:true\:true
 NVIC.ForceEnableDMAVector=true
 NVIC.HardFault_IRQn=true\:0\:0\:false\:false\:true\:false\:false\:false
 NVIC.I2C1_ER_IRQn=true\:0\:0\:false\:false\:true\:true\:true\:true
@@ -89,7 +89,7 @@ PA9.Signal=USART1_TX
 PB1.GPIOParameters=GPIO_PuPd,GPIO_Label,GPIO_ModeDefaultEXTI
 PB1.GPIO_Label=touch_check
 PB1.GPIO_ModeDefaultEXTI=GPIO_MODE_IT_RISING
-PB1.GPIO_PuPd=GPIO_PULLDOWN
+PB1.GPIO_PuPd=GPIO_NOPULL
 PB1.Locked=true
 PB1.Signal=GPXTI1
 PB10.Mode=Asynchronous
